@@ -2,7 +2,13 @@ contract token{
 
 	//a uint256 that defines the price of your token in wei; each token can be purchased with tokenPrice wei
 	uint256 public tokenPrice = 1;
+	uint256 public existAmount;
+	mapping (address => uint256) balance;
+	address public owner;
 
+	constructor(){
+        owner = msg.sender; // assign the address of owner
+    }
 
 	event Purchase(address buyer, uint256 amount);
 	event Transfer(address sender, address receiver, uint256 amount);
@@ -14,7 +20,11 @@ contract token{
 		and emits an event Purchase with the buyer’s address and the purchased amount
 	*/
 	function buyToken(uint256 amount) public returns (bool isSuccessful) {
-
+		require(msg.value >= tokenPrice*amount,"Insufficient value.")
+		require (balance [msg.sender] + amount >= balance[sender],"sorry,your balance is full now.")
+		balance [msg.sender] += amount;
+		require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.")
+		existAmount += amount;
 	}
 
 	/*	a function that transfers amount number of
@@ -49,7 +59,7 @@ contract token{
 		a view that returns the amount of tokens that the user owns
 	*/
 	function getBalance() public view{
-
+		return balance[msg.sender];
 	}
 }
 
