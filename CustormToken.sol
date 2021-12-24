@@ -12,11 +12,11 @@ contract token{
 	mapping (address => uint256) balance;
 	address public owner;
 
-	constructor(uint256 initialPrice){
+	constructor (uint256 initialPrice) payable{
         owner = msg.sender; // assign the address of owner
         tokenPrice = initialPrice;
     }
-
+    
 	event Purchase(address buyer, uint256 amount);
 	event Transfer(address sender, address receiver, uint256 amount);
 	event Sell(address seller, uint256 amount);
@@ -26,12 +26,12 @@ contract token{
 		if the purchase is successful, the function returns a boolean value (true) 
 		and emits an event Purchase with the buyer’s address and the purchased amount
 	*/
-	function buyToken(uint256 amount) public returns (bool isSuccessful) {
-		require(msg.value >= tokenPrice*amount,"Insufficient value, please check current price then send enough value.")
+	function buyToken(uint256 amount) public payable returns (bool isSuccessful) {
+		require(msg.value >= tokenPrice*amount,"Insufficient value, please check current price then send enough value.");
 
 		//resist overflow 
-		require (balance [msg.sender] + amount >= balance[sender],"sorry,your balance is full now.")
-		require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.")
+		require (balance [msg.sender] + amount >= balance[msg.sender],"sorry,your balance is full now.");
+		require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.");
 
 		balance [msg.sender] += amount;
 		existAmount += amount;
@@ -51,10 +51,10 @@ contract token{
 
 		balance[msg.sender] -= amount;
 
-		require (balance[recipient] + amount >= balance[recipient],"sorry,the recipient's balance is full now.")
+		require (balance[recipient] + amount >= balance[recipient],"sorry,the recipient's balance is full now.");
 		balance[recipient] += amount;
 
-		emit Transfer(msg.sender,msg.recipient,amount);
+		emit Transfer(msg.sender,recipient,amount);
 
 		return true;
 
@@ -96,7 +96,7 @@ contract token{
 		require(msg.sender == owner, "You are not authorized to change the price.");
 
 		require(address(this).balance >= existAmount * price, 
-			"The contract do not have sufficient banlance" 
+			"The contract do not have sufficient banlance " 
 			"to pay for all the existed token according the price to be changed.");
 
 		emit Price(price);
@@ -107,8 +107,10 @@ contract token{
 	/*
 		a view that returns the amount of tokens that the user owns
 	*/
-	function getBalance() public view{
+	function getBalance() public view returns (uint256){
 		return balance[msg.sender];
 	}
-}
 
+    //function getContractBalance() public view returns (uint256){ return address(this).balance;}
+ 
+}
