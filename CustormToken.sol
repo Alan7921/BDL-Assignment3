@@ -70,9 +70,9 @@ contract token{
 		require(amount*tokenPrice > 1, "Sorry,the transfer operation would take 1 wei as hand fee,"
 									   " thus, you must make sure that the price of the sold token"
 									   " is higher then 1 wei.");
-		require(address(this).balance >= amount*tokenPrice, "Sorry,currently we cannot provide this service.");
 		require(balances[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
-
+		require(address(this).balance >= amount*tokenPrice, "Sorry,currently we cannot provide this service.");
+		
 		// resist re-entrancy
 		require(balances[msg.sender] - amount < balances[msg.sender]);
 		balances[msg.sender] -= amount;
