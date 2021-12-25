@@ -67,7 +67,9 @@ contract token{
 	*/
 	function sellToken(uint256 amount) public returns (bool isSuccessful) {
 		//caution: re-entrancy
-
+		require(amount*tokenPrice > 1, "Sorry,the transfer operation would take 1 wei as hand fee,"
+									   " thus, you must make sure that the price of the sold token"
+									   " is higher then 1 wei.");
 		require(address(this).balance >= amount*tokenPrice, "Sorry,currently we cannot provide this service.");
 		require(balance[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
 
@@ -99,6 +101,8 @@ contract token{
 			"The contract do not have sufficient banlance " 
 			"to pay for all the existed token according the price to be changed.");
 
+		tokenPrice = price;
+		
 		emit Price(price);
 
 		return true;
