@@ -9,7 +9,7 @@ contract token{
 	//a uint256 that defines the price of your token in wei; each token can be purchased with tokenPrice wei
 	uint256 public tokenPrice;
 	uint256 public existAmount;
-	mapping (address => uint256) balance;
+	mapping (address => uint256) balances;
 	address public owner;
 
 	constructor (uint256 initialPrice) payable{
@@ -30,10 +30,10 @@ contract token{
 		require(msg.value >= tokenPrice*amount,"Insufficient value, please check current price then send enough value.");
 
 		//resist overflow 
-		require (balance [msg.sender] + amount >= balance[msg.sender],"sorry,your balance is full now.");
+		require (balances[msg.sender] + amount >= balances[msg.sender],"sorry,your balance is full now.");
 		require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.");
 
-		balance [msg.sender] += amount;
+		balances[msg.sender] += amount;
 		existAmount += amount;
 
 		emit Purchase(msg.sender,amount);
@@ -47,12 +47,12 @@ contract token{
 		sender’s and receiver’s addresses and the transferred amount
 	*/
 	function transfer(address recipient, uint256 amount) public returns (bool isSuccessful) {
-		require(balance[msg.sender] >= amount, "You do not have enough balance.");
+		require(balances[msg.sender] >= amount, "You do not have enough balance.");
 
-		balance[msg.sender] -= amount;
+		balances[msg.sender] -= amount;
 
-		require (balance[recipient] + amount >= balance[recipient],"sorry,the recipient's balance is full now.");
-		balance[recipient] += amount;
+		require (balances[recipient] + amount >= balances[recipient],"sorry,the recipient's balance is full now.");
+		balances[recipient] += amount;
 
 		emit Transfer(msg.sender,recipient,amount);
 
@@ -71,11 +71,11 @@ contract token{
 									   " thus, you must make sure that the price of the sold token"
 									   " is higher then 1 wei.");
 		require(address(this).balance >= amount*tokenPrice, "Sorry,currently we cannot provide this service.");
-		require(balance[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
+		require(balances[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
 
 		// resist re-entrancy
-		require(balance[msg.sender] - amount < balance[msg.sender]);
-		balance[msg.sender] -= amount;
+		require(balances[msg.sender] - amount < balances[msg.sender]);
+		balances[msg.sender] -= amount;
 
 		//
 		require (existAmount - amount < existAmount);
@@ -102,7 +102,7 @@ contract token{
 			"to pay for all the existed token according the price to be changed.");
 
 		tokenPrice = price;
-		
+
 		emit Price(price);
 
 		return true;
@@ -112,9 +112,8 @@ contract token{
 		a view that returns the amount of tokens that the user owns
 	*/
 	function getBalance() public view returns (uint256){
-		return balance[msg.sender];
+		return balances[msg.sender];
 	}
 
     //function getContractBalance() public view returns (uint256){ return address(this).balance;}
- 
 }
