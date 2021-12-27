@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./CustomLib.sol";
+//import "./CustomLib.sol";
 
 contract token{
 
@@ -14,12 +14,16 @@ contract token{
 	mapping (address => uint256) balances;
 	//a address records the creator's address
 	address public owner;
+	//a address records the fundPool's address 
+	FundPool public fundPool;
 	//a bool variable to resist re-entrancy attack
 	bool public locked;
 
-	constructor (uint256 initialPrice) payable{
+
+	constructor (uint256 initialPrice, address _fundPoolAddr) payable{
         owner = msg.sender; // assign the address of owner
         tokenPrice = initialPrice;
+        fundPool = FundPool(_fundPoolAddr);
     }
 
     // Modifier to check that the caller is the owner of the contract.
@@ -53,6 +57,9 @@ contract token{
 
 		balances[msg.sender] += amount;
 		existAmount += amount;
+
+
+		fundPool.deposit{value:msg.value}();
 
 		emit Purchase(msg.sender,amount);
 
@@ -98,7 +105,9 @@ contract token{
 		existAmount -= amount;
 
 		//make the payment to the customer
-		customLib.customSend(amount*tokenPrice, msg.sender);
+		//customLib.customSend(amount*tokenPrice, msg.sender);
+
+		fundPool.transferMoneyTo(msg.sender, amount*tokenPrice);
 
 		emit Sell(msg.sender, amount);
 		return true;

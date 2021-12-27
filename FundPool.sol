@@ -6,7 +6,7 @@ import "./CustomLib.sol";
 
 contract FundPool{
 	
-	address owner;
+	address public owner;
 	mapping (address => bool) registedAddr; 
 
 	constructor (){
@@ -40,15 +40,15 @@ contract FundPool{
 		return registedAddr[_address];
 	}
 
-	function deposit () public payable registed isOwner returns (bool isSuccessful){
+	function deposit() public payable registed returns (bool isSuccessful){
 
 		emit Deposit(msg.sender,msg.value);
 
 		return true;
 	}
 
-	function transfer(address recipient, uint256 amount) public registed isOwner returns (bool isSuccessful) {
-		require(address(this).balance >= amount, "You do not have enough balance in fund pool now, please deposit more.");
+	function transferMoneyTo(address recipient, uint256 amount) public registed returns (bool isSuccessful) {
+		require(address(this).balance >= amount, "The fund pool does not have sufficient money now, please wait for filling.");
 
 		customLib.customSend(amount,recipient);
 
