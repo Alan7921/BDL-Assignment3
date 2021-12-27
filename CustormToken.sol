@@ -14,10 +14,25 @@ contract token{
 	mapping (address => uint256) balances;
 	//a address records the creator's address
 	address public owner;
+	//a bool variable to resist re-entrancy attack
+	bool public locked;
 
 	constructor (uint256 initialPrice) payable{
         owner = msg.sender; // assign the address of owner
         tokenPrice = initialPrice;
+    }
+
+    // Modifier to check that the caller is the owner of the contract.
+    modifier onlyOwner() {
+        require(msg.sender == owner, "You are not authorized to operate this function.");
+        _;
+    }
+
+    modifier noReentrancy() {
+        require(!locked, "No reentrancy");
+        locked = true;
+        _;
+        locked = false;
     }
     
 	event Purchase(address buyer, uint256 amount);
@@ -33,8 +48,8 @@ contract token{
 		require(msg.value >= tokenPrice*amount,"Insufficient value, please check current price then send enough value.");
 
 		//resist overflow 
-		require (balances[msg.sender] + amount >= balances[msg.sender],"sorry,your balance is full now.");
-		require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.");
+		//require (balances[msg.sender] + amount >= balances[msg.sender],"sorry,your balance is full now.");
+		//require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.");
 
 		balances[msg.sender] += amount;
 		existAmount += amount;
@@ -54,7 +69,7 @@ contract token{
 
 		balances[msg.sender] -= amount;
 
-		require (balances[recipient] + amount >= balances[recipient],"sorry,the recipient's balance is full now.");
+		//require (balances[recipient] + amount >= balances[recipient],"sorry,the recipient's balance is full now.");
 		balances[recipient] += amount;
 
 		emit Transfer(msg.sender,recipient,amount);
@@ -68,7 +83,7 @@ contract token{
 		the sold tokens are destroyed, the function returns a boolean value (true) and emits an
 		event Sell with the seller’s address and the sold amount of tokens
 	*/
-	function sellToken(uint256 amount) public returns (bool isSuccessful) {
+	function sellToken(uint256 amount) public noReentrancy returns (bool isSuccessful) {
 		//caution: re-entrancy
 		require(amount*tokenPrice > 1, "Sorry,the transfer operation would take 1 wei as hand fee,"
 									   " thus, you must make sure that the price of the sold token"
@@ -76,12 +91,10 @@ contract token{
 		require(balances[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
 		require(address(this).balance >= amount*tokenPrice, "Sorry,currently we cannot provide this service.");
 		
-		// resist re-entrancy
-		require(balances[msg.sender] - amount < balances[msg.sender]);
+		//require(balances[msg.sender] - amount < balances[msg.sender]);
 		balances[msg.sender] -= amount;
 
-		//
-		require (existAmount - amount < existAmount);
+		//require (existAmount - amount < existAmount);
 		existAmount -= amount;
 
 		//make the payment to the customer
@@ -97,8 +110,7 @@ contract token{
 		an event Price with the new price (Note: make sure that, whenever the price changes, the
 		contract’s funds suffice so that all tokens can be sold for the updated price)
 	*/
-	function changePrice(uint256 price) public returns (bool isSuccessful) {
-		require(msg.sender == owner, "You are not authorized to change the price.");
+	function changePrice(uint256 price) public onlyOwner returns (bool isSuccessful) {
 
 		require(address(this).balance >= existAmount * price, 
 			"The contract do not have sufficient banlance " 
