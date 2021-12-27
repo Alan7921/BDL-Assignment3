@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-//import "./CustomLib.sol";
+import "./FundPool.sol";
 
 contract token{
 
@@ -15,9 +15,9 @@ contract token{
 	//a address records the creator's address
 	address public owner;
 	//a address records the fundPool's address 
-	FundPool public fundPool;
+	FundPool private fundPool;
 	//a bool variable to resist re-entrancy attack
-	bool public locked;
+	bool private locked;
 
 
 	constructor (uint256 initialPrice, address _fundPoolAddr) payable{
@@ -138,6 +138,5 @@ contract token{
 	function getBalance() public view returns (uint256){
 		return balances[msg.sender];
 	}
-
-    //function getContractBalance() public view returns (uint256){ return address(this).balance;}
+	
 }
