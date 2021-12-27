@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./CustomLib.sol";
 
@@ -8,8 +8,11 @@ contract token{
 
 	//a uint256 that defines the price of your token in wei; each token can be purchased with tokenPrice wei
 	uint256 public tokenPrice;
+	//a uint256 records the amount of the existed token
 	uint256 public existAmount;
+	//a mapping records the balances of users
 	mapping (address => uint256) balances;
+	//a address records the creator's address
 	address public owner;
 
 	constructor (uint256 initialPrice) payable{
