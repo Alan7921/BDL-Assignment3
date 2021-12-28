@@ -121,8 +121,8 @@ contract token{
 	*/
 	function changePrice(uint256 price) public onlyOwner returns (bool isSuccessful) {
 
-		require(address(this).balance >= existAmount * price, 
-			"The contract do not have sufficient banlance " 
+		require(fundPool.showBalance() >= existAmount * price, 
+			"The fundPool do not have sufficient banlance " 
 			"to pay for all the existed token according the price to be changed.");
 
 		tokenPrice = price;
