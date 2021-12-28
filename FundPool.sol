@@ -48,7 +48,7 @@ contract FundPool{
 	}
 
 	function transferMoneyTo(address recipient, uint256 amount) public registed returns (bool isSuccessful) {
-		require(address(this).balance >= amount, "The fund pool does not have sufficient money now, please wait for filling.");
+		require(address(this).balance >= amount, "The fund pool does not have sufficient money now, please wait or filling.");
 
 		customLib.customSend(amount,recipient);
 
