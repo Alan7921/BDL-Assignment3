@@ -128,7 +128,7 @@ contract token{
 	function changePrice(uint256 price) public onlyOwner returns (bool isSuccessful) {
 		require(price >= INITIAL_PRICE, "You could not change the price " 
 										"to be lower than its initial price.");
-		require(fundPool.showBalance() >= existAmount * price, 
+		require(FUNDPOOL.showBalance() >= existAmount * price, 
 			"The fundPool do not have sufficient banlance " 
 			"to pay for all the existed token according the price to be changed.");
 

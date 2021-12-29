@@ -7,10 +7,11 @@ import "./CustomLib.sol";
 contract FundPool{
 	
 	address public owner;
-	mapping (address => bool) registedAddr; 
+	mapping (address => bool) registeredAddr; 
 
 	constructor (){
         owner = msg.sender; // assign the address of owner
+        registeredAddr[msg.sender] = true;
     }
 
 	modifier isOwner() {
@@ -18,7 +19,7 @@ contract FundPool{
         _;
     }
 
-    modifier registed() {
+    modifier registered() {
         require(contains(msg.sender), "You are not authorized to operate this function.");
         _;
     }
@@ -29,25 +30,25 @@ contract FundPool{
     event Transfer(address _to, uint256 amount);
 
 	function register(address _address) public isOwner returns (bool isSuccessful) {
-		require(!contains(_address), "This address has been registed");
-		registedAddr[_address] = true;
+		require(!contains(_address), "This address has been registered");
+		registeredAddr[_address] = true;
 
 		emit Registration(_address);
 		return true;
 	}
 
 	function contains(address _address) internal view returns (bool){
-		return registedAddr[_address];
+		return registeredAddr[_address];
 	}
 
-	function deposit() public payable registed returns (bool isSuccessful){
+	function deposit() public payable registered returns (bool isSuccessful){
 
 		emit Deposit(msg.sender,msg.value);
 
 		return true;
 	}
 
-	function transferMoneyTo(address recipient, uint256 amount) public registed returns (bool isSuccessful) {
+	function transferMoneyTo(address recipient, uint256 amount) public registered returns (bool isSuccessful) {
 		require(address(this).balance >= amount, "The fund pool does not have sufficient money now, please wait" 
 												 " for the owner to fill.");
 
@@ -60,7 +61,7 @@ contract FundPool{
 
 	}
 
-	function showBalance() public view returns (uint){
+	function showBalance() public view returns(uint){
 		return address(this).balance;
 	}
 
