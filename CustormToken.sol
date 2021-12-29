@@ -6,24 +6,28 @@ import "./FundPool.sol";
 
 contract token{
 
-	//a uint256 that defines the price of your token in wei; each token can be purchased with tokenPrice wei
+	//a uint256 that defines the price of your token in wei;
+	//each token can be purchased with tokenPrice wei
 	uint256 public tokenPrice;
+	//a immutable variable used to record the initial price
+	uint256 private immutable INITIAL_PRICE;
 	//a uint256 records the amount of the existed token
-	uint256 public existAmount;
+	uint256 private existAmount;
 	//a mapping records the balances of users
 	mapping (address => uint256) balances;
 	//a address records the creator's address
-	address public owner;
+	address private owner;
 	//a address records the fundPool's address 
-	FundPool private fundPool;
+	FundPool private immutable FUNDPOOL;
 	//a bool variable to resist re-entrancy attack
 	bool private locked;
 
 
 	constructor (uint256 initialPrice, address _fundPoolAddr) payable{
         owner = msg.sender; // assign the address of owner
+        INITIAL_PRICE = initialPrice;
         tokenPrice = initialPrice;
-        fundPool = FundPool(_fundPoolAddr);
+        FUNDPOOL = FundPool(_fundPoolAddr);
     }
 
     // Modifier to check that the caller is the owner of the contract.
@@ -59,7 +63,9 @@ contract token{
 		existAmount += amount;
 
 
-		fundPool.deposit{value:msg.value}();
+		bool success = FUNDPOOL.deposit{value:msg.value}();
+		require(success,"There is something wrong with the link between token contract and fundPool, "
+						"please wait for the owner to handle it.");
 
 		emit Purchase(msg.sender,amount);
 
@@ -96,8 +102,7 @@ contract token{
 									   " thus, you must make sure that the price of the sold token"
 									   " is higher then 1 wei.");
 		require(balances[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
-		require(address(this).balance >= amount*tokenPrice, "Sorry,currently we cannot provide this service.");
-		
+	
 		//require(balances[msg.sender] - amount < balances[msg.sender]);
 		balances[msg.sender] -= amount;
 
@@ -107,7 +112,8 @@ contract token{
 		//make the payment to the customer
 		//customLib.customSend(amount*tokenPrice, msg.sender);
 
-		fundPool.transferMoneyTo(msg.sender, amount*tokenPrice);
+		bool success = FUNDPOOL.transferMoneyTo(msg.sender, amount*tokenPrice);
+		require(success, "Transfer from fundPool failed.");
 
 		emit Sell(msg.sender, amount);
 		return true;
@@ -120,7 +126,8 @@ contract token{
 		contract’s funds suffice so that all tokens can be sold for the updated price)
 	*/
 	function changePrice(uint256 price) public onlyOwner returns (bool isSuccessful) {
-
+		require(price >= INITIAL_PRICE, "You could not change the price " 
+										"to be lower than its initial price.");
 		require(fundPool.showBalance() >= existAmount * price, 
 			"The fundPool do not have sufficient banlance " 
 			"to pay for all the existed token according the price to be changed.");

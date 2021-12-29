@@ -48,9 +48,11 @@ contract FundPool{
 	}
 
 	function transferMoneyTo(address recipient, uint256 amount) public registed returns (bool isSuccessful) {
-		require(address(this).balance >= amount, "The fund pool does not have sufficient money now, please wait or filling.");
+		require(address(this).balance >= amount, "The fund pool does not have sufficient money now, please wait" 
+												 " for the owner to fill.");
 
-		customLib.customSend(amount,recipient);
+		bool success = customLib.customSend(amount,recipient);
+		require(success, "Transfer failed.");
 
 		emit Transfer(recipient,amount);
 
@@ -61,6 +63,5 @@ contract FundPool{
 	function showBalance() public view returns (uint){
 		return address(this).balance;
 	}
-
 
 }
