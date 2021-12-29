@@ -9,9 +9,12 @@ contract FundPool{
 	address public owner;
 	mapping (address => bool) registeredAddr; 
 
+
 	constructor (){
         owner = msg.sender; // assign the address of owner
         registeredAddr[msg.sender] = true;
+
+        emit Registration(msg.sender);
     }
 
 	modifier isOwner() {
@@ -20,25 +23,20 @@ contract FundPool{
     }
 
     modifier registered() {
-        require(contains(msg.sender), "You are not authorized to operate this function.");
+        require(registeredAddr[msg.sender], "You are not authorized to operate this function.");
         _;
     }
-
 
     event Registration(address _address);
     event Deposit(address sender, uint256 value);
     event Transfer(address _to, uint256 amount);
 
 	function register(address _address) public isOwner returns (bool isSuccessful) {
-		require(!contains(_address), "This address has been registered");
+		require(!registeredAddr[_address], "This address has been registered");
 		registeredAddr[_address] = true;
 
 		emit Registration(_address);
 		return true;
-	}
-
-	function contains(address _address) internal view returns (bool){
-		return registeredAddr[_address];
 	}
 
 	function deposit() public payable registered returns (bool isSuccessful){
@@ -63,6 +61,10 @@ contract FundPool{
 
 	function showBalance() public view returns(uint){
 		return address(this).balance;
+	}
+
+	function isRegistered(address _address) public view returns(bool){
+		return registeredAddr[_address];
 	}
 
 }

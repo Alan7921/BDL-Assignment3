@@ -3,7 +3,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./FundPool.sol";
-
 contract token{
 
 	//a uint256 that defines the price of your token in wei;
@@ -53,20 +52,13 @@ contract token{
 		and emits an event Purchase with the buyer’s address and the purchased amount
 	*/
 	function buyToken(uint256 amount) public payable returns (bool isSuccessful) {
+		require(FUNDPOOL.isRegistered(address(this)),"Sorry, the token contract has not been registered with FundPool.")
 		require(msg.value >= tokenPrice*amount,"Insufficient value, please check current price then send enough value.");
-
-		//resist overflow 
-		//require (balances[msg.sender] + amount >= balances[msg.sender],"sorry,your balance is full now.");
-		//require (existAmount + amount >= existAmount,"sorry,currently the exist token approach its limitation.");
-
 		balances[msg.sender] += amount;
 		existAmount += amount;
-
-
 		bool success = FUNDPOOL.deposit{value:msg.value}();
 		require(success,"There is something wrong with the link between token contract and fundPool, "
 						"please wait for the owner to handle it.");
-
 		emit Purchase(msg.sender,amount);
 
 		return true;
@@ -79,12 +71,8 @@ contract token{
 	*/
 	function transfer(address recipient, uint256 amount) public returns (bool isSuccessful) {
 		require(balances[msg.sender] >= amount, "You do not have enough balance.");
-
 		balances[msg.sender] -= amount;
-
-		//require (balances[recipient] + amount >= balances[recipient],"sorry,the recipient's balance is full now.");
 		balances[recipient] += amount;
-
 		emit Transfer(msg.sender,recipient,amount);
 
 		return true;
@@ -102,16 +90,8 @@ contract token{
 									   " thus, you must make sure that the price of the sold token"
 									   " is higher then 1 wei.");
 		require(balances[msg.sender] >= amount, "Sorry, you do not have enough token in your balance.");
-	
-		//require(balances[msg.sender] - amount < balances[msg.sender]);
 		balances[msg.sender] -= amount;
-
-		//require (existAmount - amount < existAmount);
 		existAmount -= amount;
-
-		//make the payment to the customer
-		//customLib.customSend(amount*tokenPrice, msg.sender);
-
 		bool success = FUNDPOOL.transferMoneyTo(msg.sender, amount*tokenPrice);
 		require(success, "Transfer from fundPool failed.");
 
@@ -133,7 +113,6 @@ contract token{
 			"to pay for all the existed token according the price to be changed.");
 
 		tokenPrice = price;
-
 		emit Price(price);
 
 		return true;
@@ -144,6 +123,5 @@ contract token{
 	*/
 	function getBalance() public view returns (uint256){
 		return balances[msg.sender];
-	}
-	
+	}	
 }
